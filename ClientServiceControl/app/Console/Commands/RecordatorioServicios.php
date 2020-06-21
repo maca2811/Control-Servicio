@@ -46,6 +46,8 @@ class RecordatorioServicios extends Command
      */
     public function handle()
     {
+        //SABER SI DEBE ENVIAR CORREO
+        $actualizar=false;
         //CONSULTA DE TODOS LOS CONTRATOS
         $contratos= Contrato::orderBy('fecha_vencimiento','DESC')
         ->get();
@@ -67,22 +69,24 @@ class RecordatorioServicios extends Command
                 ->update(['estado' => 2]);
             }
             //Contrato de servicio por vencer
-            elseif($diasDiferencia<=30 && $diasDiferencia>0){
+            elseif($diasDiferencia<=30 && $diasDiferencia>0 && $diasDiferencia%5==0){
                 Contrato::where('id_contrato',$idContrato)
                 ->update(['estado' => 1]);
+                $actualizar=true;
             }
             //Contrato de servicio vencido
-            else{
+            elseif($diasDiferencia<=0){
                 Contrato::where('id_contrato',$idContrato)
                 ->update(['estado' => 0]);
             }
         }
 
+        if($actualizar){
         //ARREGLO PARA LOS SERVICOS QUE ESTÁN POR VECER
         $servicios=Servicio::Join('contrato','contrato.id_servicio','=', 'servicio.id_servicio' )
         ->Join('empresa','contrato.id_empresa','=', 'empresa.id_empresa' )
         ->Join('usuario','contrato.id_encargado','=', 'usuario.id_usuario' )
-        ->where('contrato.estado','=',1)->OrderBy('contrato.fecha_vencimiento','DESC')->get();
+        ->where('contrato.estado','=',1)->OrderBy('servicio.nombre_servicio','ASC')->get();
          
         $servicio=new Servicio();
         $servicios->nombre_usuario='sassa';
@@ -91,23 +95,21 @@ class RecordatorioServicios extends Command
 
        // Funcion encargada de enviar los correos de los servicios por vencer
        foreach($servicios as $servicio){
-            $tipoServicio=$servicio->nombre_servicio;
-            $empresa=$servicio->nombre_empresa;
-           
-            foreach($usuarios as $usuario){
-                $correo=$usuario->correo;
-                $destinatario=$usuario->nombre_usuario;
-                $servicio->nombre_usuario=$destinatario;
-              
-                //Funcion que permite enviar el correo, revise la vista , un arreglo para poder enviar informacion al correo
-                //Además el correo, el nombre del propietario del correo(destinatario) y el servicio que está por vencer 
-                Mail::send('emails',['servicio'=>$servicio],function($message) use($correo,$destinatario,$tipoServicio){ 
-                $message->from('mcmd.1128@gmail.com','Client Service Control');
-                $message->to($correo,$destinatario)->subject('Recordatorio de sevicio de '.$tipoServicio.' próximo a vencer');
-                });
-                
-        }}
-
-        
-    }
+        $tipoServicio=$servicio->nombre_servicio;
+        $empresa=$servicio->nombre_empresa;
+       
+        foreach($usuarios as $usuario){
+            $correo=$usuario->correo;
+            $destinatario=$usuario->nombre_usuario;
+            $servicio->nombre_usuario=$destinatario;
+          
+            //Funcion que permite enviar el correo, revise la vista , un arreglo para poder enviar informacion al correo
+            //Además el correo, el nombre del propietario del correo(destinatario) y el servicio que está por vencer 
+            Mail::send('emails',['servicio'=>$servicio],function($message) use($correo,$destinatario,$tipoServicio){ 
+            $message->from('mcmd.1128@gmail.com','Client Service Control');
+            $message->to($correo,$destinatario)->subject('Recordatorio de sevicio de '.$tipoServicio.' próximo a vencer');
+            });
+         }} 
+        }
+    }    
 }
