@@ -1,0 +1,21 @@
+.css-select-format{
+    background-color: #fff;
+    height: 30px;
+    width: 100px;
+    border-radius: 3px;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.css-title-format{
+    font-size: 18px;
+    color:#fff;
+}
+
+.css-user-format{
+    font-size: 18px;
+}
+
+.css-cell-format{
+    color: black;
+}
