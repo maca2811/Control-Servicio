@@ -13,7 +13,7 @@ Pamela Porras Férnandez
 Administrador de la Compañia
 Kenneth Orozco Ramírez
 	kntor497@gmail.com
-	kntor97
+	ko78
 
 El proyecto fue hecho con el framework de php Laravel 
 
