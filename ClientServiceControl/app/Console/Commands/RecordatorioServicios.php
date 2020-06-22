@@ -54,13 +54,18 @@ class RecordatorioServicios extends Command
        
         //ARREGLO PARA LOS USUARIOS DE LA APLICACIÓN
         $usuarios=Usuario::all();
-
+        
 
         foreach($contratos as $contrato){
-            $fechaActual= date('Y-m-d');
-            $fechaHoy = Carbon::parse($fechaActual);
-            $fechaVencimiento=Carbon::parse($contrato->fecha_vencimiento);
-            $diasDiferencia = $fechaVencimiento->diffInDays($fechaHoy);
+            //fecha actual 
+            $fechaActual= time(); 
+            //fecha de vencimiento del servicio
+            $fechaVencimiento= strtotime($contrato->fecha_vencimiento);
+            //diferencia de fechas
+            $diferencia = $fechaVencimiento - $fechaActual;
+            //diferencias en días redondeado
+            $diasDiferencia=round($diferencia / (60 * 60 * 24));
+            //Contrato ha actualizar
             $idContrato=$contrato->id_contrato;
     
             //Contrato de servicio vigente
@@ -73,7 +78,6 @@ class RecordatorioServicios extends Command
                 Contrato::where('id_contrato',$idContrato)
                 ->update(['estado' => 1]);
                 $actualizar=true;
-                error_log($actualizar);
             }
             //Contrato de servicio vencido
             elseif($diasDiferencia<=0){
@@ -103,13 +107,14 @@ class RecordatorioServicios extends Command
             $correo=$usuario->correo;
             $destinatario=$usuario->nombre_usuario;
             $servicio->nombre_usuario=$destinatario;
-          
+            
             //Funcion que permite enviar el correo, revise la vista , un arreglo para poder enviar informacion al correo
             //Además el correo, el nombre del propietario del correo(destinatario) y el servicio que está por vencer 
             Mail::send('emails',['servicio'=>$servicio],function($message) use($correo,$destinatario,$tipoServicio){ 
             $message->from('mcmd.1128@gmail.com','Client Service Control');
             $message->to($correo,$destinatario)->subject('Recordatorio de sevicio de '.$tipoServicio.' próximo a vencer');
-            });
+            
+        });
          }} 
         }
     }    
