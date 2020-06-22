@@ -69,10 +69,11 @@ class RecordatorioServicios extends Command
                 ->update(['estado' => 2]);
             }
             //Contrato de servicio por vencer
-            elseif($diasDiferencia<=30 && $diasDiferencia>0 && $diasDiferencia%5==0){
+            elseif($diasDiferencia<=30 && $diasDiferencia>0 && $diasDiferencia%1==0){
                 Contrato::where('id_contrato',$idContrato)
                 ->update(['estado' => 1]);
                 $actualizar=true;
+                error_log($actualizar);
             }
             //Contrato de servicio vencido
             elseif($diasDiferencia<=0){
